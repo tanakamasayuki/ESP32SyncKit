@@ -31,6 +31,7 @@ ESP32AutoSync の主な目的：
 3. **タスク・ISR 両方から安全に使える API にする**
 4. **ESP32AutoTask / ESP32TaskKit / 生 FreeRTOS タスク など、どんなタスク構成でも同じ API で使えるようにする**
 5. **良い習慣を自然に身につける設計** ISR では「通知・合図だけ」、タスクで「処理本体を行う」という FreeRTOS の基本思想を自然に守りやすい API になっています。
+6. **補助輪→中級→素の FreeRTOS への橋渡し** AutoTask の弱シンボルフックや TaskKit の Config/協調停止の設計と噛み合わせ、最終的に素の FreeRTOS API へ移行しやすい作りを目指します。
 
 ---
 
@@ -50,6 +51,12 @@ TaskKit で作ったタスクからも AutoSync を自然に利用できます�
 
 `xTaskCreatePinnedToCore()` などで生成したタスクからも AutoSync を利用可能。  
 FreeRTOS の基本APIのみへ依存しており、Arduinoで動作します。
+
+### 2.4 ライブラリ間の役割分担と学習ステップ
+- **AutoTask（補助輪）**: `begin()` を呼ぶだけでコア0/1の Low/Normal/High タスク枠が用意され、弱シンボルのフックを定義すれば動く。未定義フックは即終了しオーバーヘッドゼロ。
+- **TaskKit（中級者向け）**: `TaskConfig` と `Task.start/startLoop` でスタック/優先度/コアを明示し、`requestStop` で協調終了する。ラムダや functor で C++ らしく書ける。
+- **AutoSync（本ライブラリ）**: タスクは上記どれで作ってもよく、Queue/Notify/Semaphore/Mutex の正しい使い方を統一 API で提供する。ISR では「合図だけ」、タスクで処理本体という良い習慣を examples で身につけられる。
+- 学習導線: AutoTask で動かしてから AutoSync で同期を学び、さらに TaskKit でタスク設計を柔軟にする、という段階的習得を想定。
 
 ---
 
@@ -119,6 +126,7 @@ tryXXX()はXXX(0)を呼び出す。
 ### 4.8 設定方法
 - ランタイム設定値の構造体（例: `AutoSyncConfig`）を渡して初期化する方針
 - マクロや外部設定ファイルは使わず、コード上で完結
+- AutoTask の `Config` や TaskKit の `TaskConfig` と同様、スケッチ側で値を埋めるシンプルな構造体形式を踏襲する
 
 ### 4.9 非対象
 - マルチコアのコア割り当てはタスク生成側で管理し、本ライブラリでは介入しない
