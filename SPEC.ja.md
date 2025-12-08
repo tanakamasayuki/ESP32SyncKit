@@ -3,7 +3,8 @@
 ESP32AutoSync は、ESP32（Arduino）向けの  
 **FreeRTOS 同期プリミティブのヘッダオンリー C++ ラッパライブラリ**です。
 
-FreeRTOS の Queue / TaskNotify / Semaphore / Mutex をベースに、  
+Arduino らしいモダン C++ API から FreeRTOS の正しい使い方を自然に学べる設計で、  
+FreeRTOS の Queue / TaskNotify / BinarySemaphore / Mutex をベースに  
 - **型安全なテンプレート**、  
 - **RAII**、  
 - **ISR 自動判定**、  
@@ -12,8 +13,8 @@ FreeRTOS の Queue / TaskNotify / Semaphore / Mutex をベースに、
 
 ESP32AutoSync は以下と**組み合わせて使うことができます**：
 
-- 入門用タスクライブラリ：**ESP32AutoTask**
-- 中級者向けタスク管理ライブラリ：**ESP32TaskKit**
+- 入門用タスクライブラリ：**ESP32AutoTask**（https://github.com/tanakamasayuki/ESP32AutoTask）
+- 中級者向けタスク管理ライブラリ：**ESP32TaskKit**（https://github.com/tanakamasayuki/ESP32TaskKit）
 - 生の FreeRTOS タスク（`xTaskCreatePinnedToCore` など）
 
 > **タスクの作り方は何でもOK。  
@@ -26,9 +27,10 @@ ESP32AutoSync は以下と**組み合わせて使うことができます**：
 ESP32AutoSync の主な目的：
 
 1. **FreeRTOS の Queue / Notify / Semaphore / Mutex を C++ で安全＆直感的に扱えるようにする**
-2. **タスク・ISR 両方から安全に使える API にする**
-3. **ESP32AutoTask / ESP32TaskKit / 生 FreeRTOS タスク など、どんなタスク構成でも同じ API で使えるようにする**
-4. **良い習慣を自然に身につける設計** ISR では「通知・合図だけ」、タスクで「処理本体を行う」という FreeRTOS の基本思想を自然に守りやすい API になっています。
+2. **Arduino らしい書き味のまま FreeRTOS 的な正しい使い方を覚えられるようにする**
+3. **タスク・ISR 両方から安全に使える API にする**
+4. **ESP32AutoTask / ESP32TaskKit / 生 FreeRTOS タスク など、どんなタスク構成でも同じ API で使えるようにする**
+5. **良い習慣を自然に身につける設計** ISR では「通知・合図だけ」、タスクで「処理本体を行う」という FreeRTOS の基本思想を自然に守りやすい API になっています。
 
 ---
 
@@ -74,7 +76,7 @@ ESP32AutoSync/
     detail/AutoSyncCommon.h
 ```
 
-ユーザーはESP32AutoSync.hだよ読み込んで利用する方針。
+ユーザーは ESP32AutoSync.h を読み込んで利用する方針。
 
 ---
 
@@ -95,6 +97,32 @@ ISR では強制的にノンブロッキング動作。
 - `XXX(timeoutMs)` … ブロック（デフォルト無限）
 
 tryXXX()はXXX(0)を呼び出す。
+
+### 4.4 提供範囲（初期）
+- Queue<T>
+- Notify
+- BinarySemaphore
+- Mutex
+
+### 4.5 エラーハンドリング
+- 例外は使わず、戻り値（bool やステータス enum）で結果を返す
+- 失敗時は適切なログレベルで記録し、呼び出し側でリカバーする前提
+
+### 4.6 時間とスケジューリング
+- Arduino の `delay()` を基本にし、内部の待ち時間は 1 tick = 1 ms 固定設定のみを想定
+- 他の tick 周波数や高精度時間 API は考慮しない
+
+### 4.7 ロギング
+- ESP-IDF の `ESP_LOGE/W/I/D/V` を常に利用可能にする（Arduino 環境でも有効）
+- 目安: E=致命/操作失敗、W=リトライ・タイムアウト等、I=初期化や設定値、D/V=デバッグ用詳細
+
+### 4.8 設定方法
+- ランタイム設定値の構造体（例: `AutoSyncConfig`）を渡して初期化する方針
+- マクロや外部設定ファイルは使わず、コード上で完結
+
+### 4.9 非対象
+- マルチコアのコア割り当てはタスク生成側で管理し、本ライブラリでは介入しない
+- 電力管理やスリープ制御は考慮しない
 
 ---
 
@@ -119,8 +147,8 @@ notify.take(timeoutMs);      // ulTaskNotifyTake
 notify.wait(bits,...);       // xTaskNotifyWait
 ```
 
-### 5.3 BinarySemaphore / CountingSemaphore / Mutex
-FreeRTOS ネイティブをシンプルにラップ。
+### 5.3 BinarySemaphore / Mutex
+FreeRTOS ネイティブをシンプルにラップ（初期リリースはこの2種）。
 
 ---
 
@@ -128,6 +156,7 @@ FreeRTOS ネイティブをシンプルにラップ。
 
 - ブロック禁止（自動で tryXXX と同挙動）
 - portYIELD_FROM_ISR も内部処理
+- ISR では「送るだけ・通知するだけ」を推奨し、examples で正しい呼び方を提示する
 
 ---
 
@@ -149,6 +178,9 @@ ISR → AutoTask タスクへ処理移譲。
 - タスク生成・管理は AutoTask / TaskKit / FreeRTOS に委譲  
 - AutoSync は同期だけを担当（シンプル&安定）  
 - API は tryXXX と XXX の2系統に統一  
-- Queue の型だけテンプレートとし、その他はシンプルに保つ  
+- Queue の型だけテンプレートとし、その他はシンプルに保つ
+- 戻り値ベースでエラーを返し、例外は使わない
+- 1 tick = 1 ms 前提で設計し、delay() を基本にする
+- マルチコアのコア割り当てやスリープ制御は扱わない（タスク側で指定）
 
 ---
