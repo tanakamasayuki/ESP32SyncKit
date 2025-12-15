@@ -76,6 +76,7 @@ namespace ESP32AutoSync
 
       const bool inIsr = xPortInIsrContext();
       TickType_t ticks = (inIsr || timeoutMs == 0) ? 0 : (timeoutMs == WaitForever ? portMAX_DELAY : pdMS_TO_TICKS(timeoutMs));
+      const bool nonBlocking = (ticks == 0);
 
       if (inIsr)
       {
@@ -97,7 +98,10 @@ namespace ESP32AutoSync
         BaseType_t rc = xQueueSend(handle_, &value, ticks);
         if (rc != pdPASS)
         {
-          ESP_LOGW(kLogTag, "[Queue] send failed: rc=%ld", static_cast<long>(rc));
+          if (!nonBlocking)
+          {
+            ESP_LOGW(kLogTag, "[Queue] send timeout/full");
+          }
           return false;
         }
         return true;
@@ -116,6 +120,7 @@ namespace ESP32AutoSync
 
       const bool inIsr = xPortInIsrContext();
       TickType_t ticks = (inIsr || timeoutMs == 0) ? 0 : (timeoutMs == WaitForever ? portMAX_DELAY : pdMS_TO_TICKS(timeoutMs));
+      const bool nonBlocking = (ticks == 0);
 
       if (inIsr)
       {
@@ -136,6 +141,10 @@ namespace ESP32AutoSync
         BaseType_t rc = xQueueReceive(handle_, &out, ticks);
         if (rc != pdPASS)
         {
+          if (!nonBlocking)
+          {
+            ESP_LOGW(kLogTag, "[Queue] receive timeout");
+          }
           return false;
         }
         return true;
@@ -258,7 +267,7 @@ namespace ESP32AutoSync
       }
       if (xPortInIsrContext())
       {
-        ESP_LOGW(kLogTag, "[Notify] take called in ISR (forced non-block) - not supported");
+        // FreeRTOS does not support ulTaskNotifyTake from ISR; return immediately (non-block)
         return false;
       }
 
@@ -320,28 +329,59 @@ namespace ESP32AutoSync
       }
       if (xPortInIsrContext())
       {
-        ESP_LOGW(kLogTag, "[Notify] waitBits called in ISR (forced non-block) - not supported");
+        // FreeRTOS does not support xTaskNotifyWait from ISR; return immediately (non-block)
         return false;
       }
 
-      TickType_t ticks = (timeoutMs == 0) ? 0 : (timeoutMs == WaitForever ? portMAX_DELAY : pdMS_TO_TICKS(timeoutMs));
-      uint32_t value = 0;
-      BaseType_t rc = xTaskNotifyWait(
-          0,
-          clearOnExit ? mask : 0,
-          &value,
-          ticks);
-      if (rc != pdPASS)
+      TickType_t totalTicks = (timeoutMs == 0) ? 0 : (timeoutMs == WaitForever ? portMAX_DELAY : pdMS_TO_TICKS(timeoutMs));
+      const bool infinite = (totalTicks == portMAX_DELAY);
+      TickType_t start = xTaskGetTickCount();
+      TickType_t remaining = totalTicks;
+      uint32_t accumulated = 0;
+
+      while (true)
       {
-        return false;
-      }
-      if (waitAll)
-      {
-        return (value & mask) == mask;
-      }
-      else
-      {
-        return (value & mask) != 0;
+        uint32_t value = 0;
+        BaseType_t rc = xTaskNotifyWait(
+            0,
+            clearOnExit ? mask : 0,
+            &value,
+            remaining);
+        if (rc != pdPASS)
+        {
+          return false; // timeout or failure
+        }
+
+        if (!waitAll)
+        {
+          return (value & mask) != 0;
+        }
+
+        accumulated |= value;
+        if ((accumulated & mask) == mask)
+        {
+          if (clearOnExit)
+          {
+            uint32_t dummy;
+            (void)xTaskNotifyWait(0, mask, &dummy, 0); // clear matched bits
+          }
+          return true;
+        }
+
+        if (!infinite)
+        {
+          TickType_t now = xTaskGetTickCount();
+          TickType_t elapsed = now - start;
+          if (elapsed >= totalTicks)
+          {
+            return false;
+          }
+          remaining = totalTicks - elapsed;
+        }
+        else
+        {
+          remaining = portMAX_DELAY;
+        }
       }
     }
 
@@ -381,8 +421,13 @@ namespace ESP32AutoSync
     {
       if (!target_)
       {
-        ESP_LOGW(kLogTag, "[Notify] receive failed: not bound");
-        return false;
+        if (xPortInIsrContext())
+        {
+          ESP_LOGW(kLogTag, "[Notify] receive failed: not bound (ISR)");
+          return false;
+        }
+        // auto-bind to current task
+        target_ = xTaskGetCurrentTaskHandle();
       }
       if (target_ != xTaskGetCurrentTaskHandle())
       {
