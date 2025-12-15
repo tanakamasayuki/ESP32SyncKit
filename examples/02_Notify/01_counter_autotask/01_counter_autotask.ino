@@ -5,7 +5,9 @@ using namespace ESP32AutoSync;
 
 // en: Notify in counter mode (auto-lock on first use)
 // ja: Notify カウンタモード（初回使用でモード確定）
-Notify n; // en/ja: counter mode locks on first use
+// en: counter mode locks on first use
+// ja: 初回使用でカウンタモードに固定
+Notify n;
 
 void setup()
 {
@@ -17,7 +19,9 @@ void setup()
 // ja: 送信側がカウンタを増やす
 void LoopCore0_Normal()
 {
-  if (!n.notify()) // en/ja: auto-locks mode to counter
+  // en: notify (auto-locks mode to counter)
+  // ja: notify（カウンタモードに自動固定）
+  if (!n.notify())
   {
     Serial.println("[Notify/counter] notify failed");
   }

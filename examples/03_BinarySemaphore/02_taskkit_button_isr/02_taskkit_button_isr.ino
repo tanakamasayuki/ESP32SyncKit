@@ -4,7 +4,9 @@
 using namespace ESP32AutoSync;
 using namespace TaskKit;
 
-constexpr int kButtonPin = 0; // en/ja: adjust to your board
+// en: adjust to your board
+// ja: ボードに合わせてピン番号を設定
+constexpr int kButtonPin = 0;
 
 // en: Button ISR gives semaphore; TaskKit task takes it
 // ja: ボタン ISR が give し、TaskKit タスクが take
@@ -13,7 +15,9 @@ Task handlerTask;
 
 void IRAM_ATTR onButton()
 {
-  if (!buttonSem.give()) // en/ja: ISR-safe give
+  // en: ISR-safe give
+  // ja: ISR から安全に give
+  if (!buttonSem.give())
   {
     // ISR なのでシリアルは避け、最小限の処理のみ
   }

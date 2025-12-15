@@ -9,7 +9,7 @@ constexpr uint32_t kBitTxDone = 1 << 1;
 
 // en: Notify in bits mode (TaskKit tasks)
 // ja: Notify ビットモード（TaskKit タスクで利用）
-Notify evt(Notify::Mode::Bits); // en/ja: preset to bits mode
+Notify evt(Notify::Mode::Bits); // preset to bits mode
 Task producer;
 Task consumer;
 

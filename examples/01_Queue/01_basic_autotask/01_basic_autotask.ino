@@ -20,11 +20,13 @@ void setup()
 void LoopCore0_Normal()
 {
   static int counter = 0;
-  if (!q.send(counter++)) // en/ja: send and check result
+  // en: send and check result
+  // ja: 送信し、結果を確認
+  if (!q.send(counter++))
   {
     Serial.println("[Queue] send failed");
   }
-  delay(500);        // en: throttle send rate / ja: 送信間隔を確保
+  delay(500); // en: throttle send rate / ja: 送信間隔を確保
 }
 
 // en: Consumer (core1 normal)
