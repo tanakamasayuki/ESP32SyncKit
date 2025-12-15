@@ -228,15 +228,15 @@ namespace ESP32AutoSync
       }
 
       const bool inIsr = xPortInIsrContext();
-    if (inIsr)
-    {
-      BaseType_t taskWoken = pdFALSE;
-      BaseType_t rc = xTaskNotifyFromISR(target_, 0, eIncrement, &taskWoken);
-      if (taskWoken == pdTRUE)
+      if (inIsr)
       {
-        portYIELD_FROM_ISR();
-      }
-      if (rc != pdPASS)
+        BaseType_t taskWoken = pdFALSE;
+        BaseType_t rc = xTaskNotifyFromISR(target_, 0, eIncrement, &taskWoken);
+        if (taskWoken == pdTRUE)
+        {
+          portYIELD_FROM_ISR();
+        }
+        if (rc != pdPASS)
         {
           ESP_LOGW(kLogTag, "[Notify] notify ISR failed: rc=%ld", static_cast<long>(rc));
           return false;
@@ -349,7 +349,7 @@ namespace ESP32AutoSync
             remaining);
         if (rc != pdPASS)
         {
-        return false; // en: timeout or failure / ja: タイムアウトまたは失敗
+          return false; // en: timeout or failure / ja: タイムアウトまたは失敗
         }
 
         if (!waitAll)
