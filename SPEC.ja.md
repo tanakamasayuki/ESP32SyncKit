@@ -3,6 +3,8 @@
 ESP32AutoSync は、ESP32（Arduino）向けの  
 **FreeRTOS 同期プリミティブのヘッダオンリー C++ ラッパライブラリ**です。
 
+公式リポジトリ: https://github.com/tanakamasayuki/ESP32AutoSync
+
 Arduino らしいモダン C++ API から FreeRTOS の正しい使い方を自然に学べる設計で、  
 FreeRTOS の Queue / TaskNotify / BinarySemaphore / Mutex をベースに  
 - **型安全なテンプレート**、  
@@ -65,7 +67,7 @@ FreeRTOS の基本APIのみへ依存しており、Arduinoで動作します。
 ### 3.1 名前空間
 
 ```cpp
-namespace AutoSync {
+namespace ESP32AutoSync {
     // Queue<T>, Notify, BinarySemaphore, Mutex など
 }
 ```
@@ -76,11 +78,11 @@ namespace AutoSync {
 ESP32AutoSync/
   src/
     ESP32AutoSync.h
-    AutoSyncQueue.h
-    AutoSyncNotify.h
-    AutoSyncBinarySemaphore.h
-    AutoSyncMutex.h
-    detail/AutoSyncCommon.h
+    ESP32AutoSyncQueue.h
+    ESP32AutoSyncNotify.h
+    ESP32AutoSyncBinarySemaphore.h
+    ESP32AutoSyncMutex.h
+    detail/ESP32AutoSyncCommon.h
 ```
 
 ユーザーは ESP32AutoSync.h を読み込んで利用する方針。
@@ -91,7 +93,7 @@ ESP32AutoSync/
 
 ### 4.1 WaitForever
 ```cpp
-constexpr uint32_t WaitForever = UINT32_MAX;
+constexpr uint32_t WaitForever = portMAX_DELAY;
 ```
 `timeoutMs = WaitForever` のとき `portMAX_DELAY` で待機。  
 ISR では強制的にノンブロッキング動作。
@@ -184,13 +186,13 @@ FreeRTOS ネイティブをシンプルにラップ（初期リリースはこ�
 
 ## 7. ユースケース例
 
-### 7.1 AutoTask + AutoSync
-ISR → AutoTask タスクへ処理移譲。
+### 7.1 ESP32AutoTask + ESP32AutoSync
+ISR → ESP32AutoTask タスクへ処理移譲。
 
-### 7.2 TaskKit + AutoSync
-複数 TaskKit タスクでキュー共有。
+### 7.2 ESP32TaskKit + ESP32AutoSync
+複数 ESP32TaskKit タスクでキュー共有。
 
-### 7.3 生 FreeRTOS + AutoSync
+### 7.3 生 FreeRTOS + ESP32AutoSync
 既存タスク群の同期レイヤとして追加可能。
 
 ### サンプルコードのコメント方針
@@ -199,16 +201,16 @@ ISR → AutoTask タスクへ処理移譲。
 - 行末に書く場合は 1 行で区切る（例: `// en: ... / ja: ...`）
 
 ### サンプルの作り分け方針
-- AutoTask: タスク枠が限られるため、1タスク内で複数ノンブロッキング関数を回す「共有タスク構造」を基本にする
-- TaskKit: タスクを気軽に増やせるので、ブロッキング処理を専用タスクに分離する方式を基本にする
+- ESP32AutoTask: タスク枠が限られるため、1タスク内で複数ノンブロッキング関数を回す「共有タスク構造」を基本にする
+- ESP32TaskKit: タスクを気軽に増やせるので、ブロッキング処理を専用タスクに分離する方式を基本にする
 - 各機能（Queue/Notify/BinarySemaphore/Mutex）でノンブロックとブロックの双方のサンプルを用意する
 
 ---
 
 ## 8. 設計ポリシー
 
-- タスク生成・管理は AutoTask / TaskKit / FreeRTOS に委譲  
-- AutoSync は同期だけを担当（シンプル&安定）  
+- タスク生成・管理は ESP32AutoTask / ESP32TaskKit / FreeRTOS に委譲  
+- ESP32AutoSync は同期だけを担当（シンプル&安定）  
 - API は tryXXX と XXX の2系統に統一  
 - Queue の型だけテンプレートとし、その他はシンプルに保つ
 - 戻り値は `bool` で返し、例外は使わない
