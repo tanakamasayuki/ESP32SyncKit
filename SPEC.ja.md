@@ -226,6 +226,7 @@ Mutex::LockGuard guard(mutex);          // RAII でスコープ解放時 unlock
 - `lock` は `WaitForever` で無限待ち、タイムアウト時は false。  
 - `LockGuard` で取得漏れ/解放漏れを防ぎ、例外非使用環境でもスコープで確実に `unlock`。  
 - 生成は `xSemaphoreCreateMutex`（非再帰、優先度継承あり）で行い、失敗時は null。コピー不可・ムーブ可。初回利用時に遅延生成してもよい。
+- LockGuard の挙動: コンストラクタで `lock(timeoutMs)` を呼び、成功時のみ「保持中」フラグを立てる。失敗時はフラグ false のまま（ログで警告）、デストラクタは保持中の場合のみ `unlock` するためダブルアンロックを防げる。`locked()` などで取得成否を呼び出し側が確認できるようにし、デフォルト `timeoutMs` は `WaitForever`（取り切る前提）。必要に応じて短いタイムアウトを明示指定し、失敗時の処理をコード側で行う。
 
 ---
 

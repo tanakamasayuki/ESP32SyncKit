@@ -212,6 +212,7 @@ Mutex::LockGuard guard(mutex);          // RAII unlock on scope exit
 - `lock` supports infinite wait; returns false on timeout.  
 - `LockGuard` prevents leak/forget to unlock, even without exceptions.
 - Created via `xSemaphoreCreateMutex` (non-recursive, priority inheritance). On failure, handle is null. Copy disallowed; move allowed. Lazy creation on first use is acceptable.
+- LockGuard behavior: ctor calls `lock(timeoutMs)`, sets a “held” flag only on success. On failure, flag stays false (log a warning); dtor unlocks only when held to avoid double-unlock. Provide `locked()` (or similar) so callers can check acquisition. Default `timeoutMs` is `WaitForever` (block until acquired); if you need bounded wait, pass a shorter timeout and handle the failure explicitly.
 
 ---
 
