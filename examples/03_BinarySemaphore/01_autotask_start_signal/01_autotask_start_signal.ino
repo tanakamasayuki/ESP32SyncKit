@@ -41,3 +41,8 @@ void LoopCore1_Normal()
     }
   }
 }
+
+void loop()
+{
+  delay(1);
+}
