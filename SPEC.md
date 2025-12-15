@@ -137,6 +137,11 @@ Internally uses `xPortInIsrContext()` and picks FromISR APIs automatically.
 
 ## 5. Class Specs
 
+### 5.0 Lifecycle & Ownership (common policy)
+- RAII: ctor creates the FreeRTOS resource, dtor deletes it (except Notify, which has no RTOS object). On creation failure, keep handle null; methods return false and log.
+- Copy is disallowed. Move is allowed; moved-from instances clear their handles.
+- For global/static use, consider lazy creation on first use to avoid static-init ordering issues before FreeRTOS is fully up.
+
 ### 5.1 Queue<T>
 Typed queue with ISR auto-detection.
 
@@ -191,6 +196,7 @@ binary.tryTake();                       // == take(0)
 
 - `give` auto-selects FromISR and runs `portYIELD_FROM_ISR` when needed.  
 - `take` blocks with `WaitForever` in tasks; forced 0 ms in ISR. Returns success/timeout.
+- Created via `xSemaphoreCreateBinary` (initial count 0). If creation fails, handle is null. Copy disallowed; move allowed. Lazy creation on first use is acceptable if needed.
 
 ### 5.4 Mutex
 Wrapper of FreeRTOS standard mutex. Mutual exclusion for shared resources (task-only).
@@ -205,6 +211,7 @@ Mutex::LockGuard guard(mutex);          // RAII unlock on scope exit
 - Uses priority-inheritance mutex. Do not use from ISR.  
 - `lock` supports infinite wait; returns false on timeout.  
 - `LockGuard` prevents leak/forget to unlock, even without exceptions.
+- Created via `xSemaphoreCreateMutex` (non-recursive, priority inheritance). On failure, handle is null. Copy disallowed; move allowed. Lazy creation on first use is acceptable.
 
 ---
 

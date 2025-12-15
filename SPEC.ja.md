@@ -151,6 +151,11 @@ tryXXX()はXXX(0)を呼び出す。
 
 ## 5. クラス仕様
 
+### 5.0 ライフサイクルと所有権（共通方針）
+- RAII: コンストラクタで FreeRTOS リソースを確保し、デストラクタで解放（Notify 以外）。生成に失敗した場合ハンドルは null とし、各メソッドは false を返してログで警告。
+- コピーは禁止。ムーブは許可し、所有権を移した元はハンドルをクリアして安全側に倒す。
+- グローバル/static 利用の安全策として、初回利用時に遅延生成する実装を検討（Arduino 環境で FreeRTOS 起動前の static 初期化に備えるため）。
+
 ### 5.1 Queue<T>
 テンプレートキュー（型安全・ISR自動判定）。
 
@@ -205,6 +210,7 @@ binary.tryTake();                       // == take(0)
 
 - `give` は FromISR を自動選択し、必要なら `portYIELD_FROM_ISR` を内部で実行。  
 - `take` は `WaitForever` で無限待ち、ISR 上では強制 0ms（ノンブロック）。戻り値は成功/タイムアウトの bool。  
+- 生成は `xSemaphoreCreateBinary`（初期値0）で行い、失敗時は null。コピー不可・ムーブ可。必要なら初回利用時に遅延生成してもよい。
 
 ### 5.4 Mutex
 FreeRTOS 標準ミューテックスのラッパ。共有リソースの排他用（タスク専用）。
@@ -219,6 +225,7 @@ Mutex::LockGuard guard(mutex);          // RAII でスコープ解放時 unlock
 - 優先度逆転防止付きの標準ミューテックスを利用。ISR からは使用不可。  
 - `lock` は `WaitForever` で無限待ち、タイムアウト時は false。  
 - `LockGuard` で取得漏れ/解放漏れを防ぎ、例外非使用環境でもスコープで確実に `unlock`。  
+- 生成は `xSemaphoreCreateMutex`（非再帰、優先度継承あり）で行い、失敗時は null。コピー不可・ムーブ可。初回利用時に遅延生成してもよい。
 
 ---
 
