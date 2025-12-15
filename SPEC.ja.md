@@ -191,6 +191,7 @@ notify.tryWaitBits(mask,
 - ビットは `xTaskNotifyWait` ベース。`waitAll=false` なら指定マスクのいずれかが立ったら復帰、`true` なら全ビットが揃うまで待つ。`clearOnExit=true` で満たしたビットをクリア。  
 - ISR からの `notify()` / `setBits()` は自動で FromISR 版を選択し、必要に応じて `portYIELD_FROM_ISR` を内部で実行する。  
 - `timeoutMs` に `WaitForever` を指定するとタスク上では無限待ち、ISR では強制ノンブロック（0ms）になる。戻り値は全て `bool`（成功/タイムアウト）。
+- バインド方針: 初期状態は未バインド。最初に `take`/`waitBits` を呼んだタスクを受信者として自動バインドし、その後は固定。明示的に宛先を指定したい場合はコンストラクタや `bindTo(handle)` / `bindToSelf()` を用意し、一度バインドしたら再バインド不可。未バインドのまま `notify`/`setBits` が呼ばれた場合や、受信者と異なるタスクが `take`/`waitBits` を呼んだ場合は false を返しログで警告する。
 
 ### 5.3 BinarySemaphore
 FreeRTOS バイナリセマフォの薄いラッパ。単発イベントや起動合図向け。

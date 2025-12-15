@@ -177,6 +177,7 @@ notify.tryWaitBits(mask,
 - Bit mode is based on `xTaskNotifyWait`: `waitAll=false` waits for any bit in mask, `true` waits for all; `clearOnExit=true` clears satisfied bits.  
 - ISR `notify()` / `setBits()` auto-pick FromISR versions and call `portYIELD_FROM_ISR` as needed.  
 - `timeoutMs = WaitForever` blocks forever in tasks, forced to 0 ms (non-blocking) in ISR. All return `bool` (success/timeout).
+- Binding policy: start unbound. The first task that calls `take`/`waitBits` auto-binds as the receiver and remains fixed. If you want explicit binding, support ctor or `bindTo(handle)` / `bindToSelf()`, with no rebind allowed. Calling `notify`/`setBits` while unbound or calling `take`/`waitBits` from a non-receiver task returns false and logs a warning.
 
 ### 5.3 BinarySemaphore
 Thin wrapper of FreeRTOS binary semaphore. Use for one-shot events or start signals.
