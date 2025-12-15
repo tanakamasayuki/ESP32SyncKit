@@ -115,6 +115,7 @@ Internally uses `xPortInIsrContext()` and picks FromISR APIs automatically.
 ### 4.5 Error Handling
 - No exceptions; return `bool` for success/failure.
 - On failure, log at appropriate level; caller is expected to recover.
+- Errors only log and continue running (no assert/abort). Even for misuse, return false and log.
 
 ### 4.6 Time and Scheduling
 - Assume Arduino `delay()` and tick = 1 ms.
@@ -142,6 +143,7 @@ Internally uses `xPortInIsrContext()` and picks FromISR APIs automatically.
 - RAII: ctor creates the FreeRTOS resource, dtor deletes it (except Notify, which has no RTOS object). On creation failure, keep handle null; methods return false and log.
 - Copy is disallowed. Move is allowed; moved-from instances clear their handles.
 - For global/static use, consider lazy creation on first use to avoid static-init ordering issues before FreeRTOS is fully up.
+- Default to dynamic creation (`xQueueCreate` / `xSemaphoreCreate*`). Static variants are optional for heap-avoidance use cases.
 
 ### 5.1 Queue<T>
 Typed queue with ISR auto-detection.
