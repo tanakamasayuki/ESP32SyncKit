@@ -108,6 +108,86 @@ namespace ESP32AutoSync
       }
     }
 
+    bool trySendToFront(const T &value) { return sendToFront(value, 0); }
+
+    bool sendToFront(const T &value, uint32_t timeoutMs = WaitForever)
+    {
+      if (!handle_)
+      {
+        ESP_LOGE(kLogTag, "[Queue] sendToFront failed: handle null");
+        return false;
+      }
+
+      const bool inIsr = xPortInIsrContext();
+      TickType_t ticks = (inIsr || timeoutMs == 0) ? 0 : (timeoutMs == WaitForever ? portMAX_DELAY : pdMS_TO_TICKS(timeoutMs));
+      const bool nonBlocking = (ticks == 0);
+
+      if (inIsr)
+      {
+        BaseType_t taskWoken = pdFALSE;
+        BaseType_t rc = xQueueSendToFrontFromISR(handle_, &value, &taskWoken);
+        if (taskWoken == pdTRUE)
+        {
+          portYIELD_FROM_ISR();
+        }
+        if (rc != pdPASS)
+        {
+          ESP_LOGW(kLogTag, "[Queue] sendToFront ISR failed: rc=%ld", static_cast<long>(rc));
+          return false;
+        }
+        return true;
+      }
+      else
+      {
+        BaseType_t rc = xQueueSendToFront(handle_, &value, ticks);
+        if (rc != pdPASS)
+        {
+          if (!nonBlocking)
+          {
+            ESP_LOGW(kLogTag, "[Queue] sendToFront timeout/full");
+          }
+          return false;
+        }
+        return true;
+      }
+    }
+
+    bool overwrite(const T &value)
+    {
+      if (!handle_)
+      {
+        ESP_LOGE(kLogTag, "[Queue] overwrite failed: handle null");
+        return false;
+      }
+
+      const bool inIsr = xPortInIsrContext();
+      if (inIsr)
+      {
+        BaseType_t taskWoken = pdFALSE;
+        BaseType_t rc = xQueueOverwriteFromISR(handle_, &value, &taskWoken);
+        if (taskWoken == pdTRUE)
+        {
+          portYIELD_FROM_ISR();
+        }
+        if (rc != pdPASS)
+        {
+          ESP_LOGW(kLogTag, "[Queue] overwrite ISR failed: rc=%ld", static_cast<long>(rc));
+          return false;
+        }
+        return true;
+      }
+      else
+      {
+        BaseType_t rc = xQueueOverwrite(handle_, &value);
+        if (rc != pdPASS)
+        {
+          ESP_LOGW(kLogTag, "[Queue] overwrite failed");
+          return false;
+        }
+        return true;
+      }
+    }
+
     bool tryReceive(T &out) { return receive(out, 0); }
 
     bool receive(T &out, uint32_t timeoutMs = WaitForever)

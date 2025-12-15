@@ -152,12 +152,16 @@ Typed queue with ISR auto-detection.
 Queue<T> q(depth);                   // Depth set in ctor
 q.trySend(value);                    // == send(value, 0)
 q.send(value, timeoutMs = WaitForever);
+q.trySendToFront(value);             // non-blocking send to front
+q.sendToFront(value, timeoutMs);     // send to front (can block in tasks)
+q.overwrite(value);                  // overwrite with latest (mailbox use, depth=1)
 q.tryReceive(out);                   // == receive(out, 0)
 q.receive(out, timeoutMs = WaitForever);
 ```
 
 - In tasks, `timeoutMs = WaitForever` blocks forever; in ISR it is forced non-blocking.  
 - `send/receive` auto-select `xQueueSend` / `xQueueSendFromISR` / `xQueueReceive` / `xQueueReceiveFromISR`, with `portYIELD_FROM_ISR` handled inside when needed.  
+- `sendToFront` inserts at the front (advanced; breaks strict FIFO). `overwrite` replaces with the latest value (mailbox use, depth 1 assumed; non-blocking).  
 - `T` should be copy/move-capable. For large payloads, pass pointers or small structs.  
 - Returns `bool` (false on timeout/full). Failures log; caller recovers.
 - Thread/ISR safety: multiple tasks may send/receive on the same instance. ISR receive works via FromISR, but keep actual processing in tasks; receiving in ISR is possible but not the primary pattern.
