@@ -15,15 +15,14 @@ void setup()
       []
       {
         static int value = 0;
-        q.send(value++, 1000);
         if (!q.send(value++, 1000))
         {
           Serial.println("[Queue/TaskKit] send failed");
         }
-        delay(500);
         return true;
       },
-      ESP32TaskKit::TaskConfig{.name = "producer", .priority = 2});
+      ESP32TaskKit::TaskConfig{.name = "producer"},
+      500);
 
   consumer.startLoop(
       []
@@ -31,12 +30,11 @@ void setup()
         int v = 0;
         if (q.receive(v))
         {
-          Serial.printf("[Queue/TaskKit] received: %d\n", v);
+          Serial.printf("[Queue/TaskKit] core: %d, received: %d\n", xPortGetCoreID(), v);
         }
-        delay(1);
         return true;
       },
-      ESP32TaskKit::TaskConfig{.name = "consumer", .priority = 2});
+      ESP32TaskKit::TaskConfig{.name = "consumer", .priority = 2, .core = tskNO_AFFINITY});
 }
 
 void loop()

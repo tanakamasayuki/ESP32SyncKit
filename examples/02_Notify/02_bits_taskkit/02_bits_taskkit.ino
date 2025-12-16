@@ -19,19 +19,41 @@ void setup()
   producer.startLoop(
       []
       {
-        if (!evt.setBits(kBitRxReady))
+        enum class Phase
         {
-          Serial.println("[Notify/bits] setBits RX failed");
-        }
-        delay(200);
-        if (!evt.setBits(kBitTxDone))
+          SendRx,
+          SendTx
+        };
+        static Phase phase = Phase::SendRx;
+        static uint8_t cooldown = 0; // count 200ms ticks to space events
+
+        if (cooldown > 0)
         {
-          Serial.println("[Notify/bits] setBits TX failed");
+          --cooldown;
+          return true;
         }
-        delay(800);
+
+        if (phase == Phase::SendRx)
+        {
+          if (!evt.setBits(kBitRxReady))
+          {
+            Serial.println("[Notify/bits] setBits RX failed");
+          }
+          phase = Phase::SendTx;
+        }
+        else
+        {
+          if (!evt.setBits(kBitTxDone))
+          {
+            Serial.println("[Notify/bits] setBits TX failed");
+          }
+          phase = Phase::SendRx;
+          cooldown = 3; // wait another 600ms before the next RX-ready
+        }
         return true;
       },
-      ESP32TaskKit::TaskConfig{.name = "bits-setter", .priority = 2});
+      ESP32TaskKit::TaskConfig{.name = "bits-setter", .priority = 2},
+      200);
 
   consumer.startLoop(
       []

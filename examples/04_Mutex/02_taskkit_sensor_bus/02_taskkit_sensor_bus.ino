@@ -6,6 +6,9 @@
 ESP32AutoSync::Mutex busMutex;
 ESP32TaskKit::Task sensorTask;
 ESP32TaskKit::Task loggerTask;
+constexpr uint32_t kSensorHoldMs = 250;
+constexpr uint32_t kLoggerHoldMs = 500;
+constexpr uint32_t kMutexLoopIntervalMs = 50;
 
 void setup()
 {
@@ -14,37 +17,65 @@ void setup()
   sensorTask.startLoop(
       []
       {
-        ESP32AutoSync::Mutex::LockGuard lock(busMutex);
-        if (lock.locked())
+        static bool holding = false;
+        static uint32_t releaseAtMs = 0;
+
+        if (!holding)
         {
-          // en: simulate I2C/SPI transaction / ja: I2C/SPI 通信を模擬
-          delay(50);
+          if (busMutex.lock())
+          {
+            holding = true;
+            releaseAtMs = millis() + kSensorHoldMs;
+          }
+          else
+          {
+            Serial.println("[Mutex/TaskKit] lock failed");
+          }
         }
-        else
+        else if ((int32_t)(millis() - releaseAtMs) >= 0)
         {
-          Serial.println("[Mutex/TaskKit] lock failed");
+          if (!busMutex.unlock())
+          {
+            Serial.println("[Mutex/TaskKit] unlock failed");
+          }
+          holding = false;
         }
-        delay(200);
         return true;
       },
-      ESP32TaskKit::TaskConfig{.name = "sensor", .priority = 2});
+      ESP32TaskKit::TaskConfig{.name = "sensor", .priority = 2},
+      kMutexLoopIntervalMs);
 
   loggerTask.startLoop(
       []
       {
-        ESP32AutoSync::Mutex::LockGuard lock(busMutex);
-        if (lock.locked())
+        static bool holding = false;
+        static uint32_t releaseAtMs = 0;
+
+        if (!holding)
         {
-          Serial.println("[Mutex/TaskKit] logging with bus lock");
+          if (busMutex.lock())
+          {
+            holding = true;
+            releaseAtMs = millis() + kLoggerHoldMs;
+            Serial.println("[Mutex/TaskKit] logging with bus lock");
+          }
+          else
+          {
+            Serial.println("[Mutex/TaskKit] lock failed");
+          }
         }
-        else
+        else if ((int32_t)(millis() - releaseAtMs) >= 0)
         {
-          Serial.println("[Mutex/TaskKit] lock failed");
+          if (!busMutex.unlock())
+          {
+            Serial.println("[Mutex/TaskKit] unlock failed");
+          }
+          holding = false;
         }
-        delay(500);
         return true;
       },
-      ESP32TaskKit::TaskConfig{.name = "logger", .priority = 2});
+      ESP32TaskKit::TaskConfig{.name = "logger", .priority = 2},
+      kMutexLoopIntervalMs);
 }
 
 void loop()
