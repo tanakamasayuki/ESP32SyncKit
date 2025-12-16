@@ -14,7 +14,7 @@ void sender(void * /*pv*/)
     {
       Serial.println("[Queue/raw] send failed");
     }
-    delay(200);
+    delay(500);
   }
 }
 
@@ -25,7 +25,7 @@ void receiver(void * /*pv*/)
   {
     if (q.receive(v))
     {
-      Serial.printf("[Queue/raw] core=%d recv=%d\n", xPortGetCoreID(), v);
+      Serial.printf("[Queue/raw] core=%d, received=%d\n", xPortGetCoreID(), v);
     }
   }
 }

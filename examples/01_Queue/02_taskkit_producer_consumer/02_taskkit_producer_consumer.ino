@@ -30,7 +30,7 @@ void setup()
         int v = 0;
         if (q.receive(v))
         {
-          Serial.printf("[Queue/TaskKit] core: %d, received: %d\n", xPortGetCoreID(), v);
+          Serial.printf("[Queue/TaskKit] core=%d, received=%d\n", xPortGetCoreID(), v);
         }
         return true;
       },
