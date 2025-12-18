@@ -23,16 +23,23 @@ void LoopCore0_Normal()
   {
     Serial.println("[Notify/counter] notify failed");
   }
+  delay(1000);
 }
 
-// en: Consumer takes notifications
-// ja: 受信側が通知を1件消費
+// en: Consumer drains pending notifications every 2 seconds (non-blocking take)
+// ja: 受信側は2秒ごとにたまった通知をノンブロックでまとめて消費
 void LoopCore1_Normal()
 {
-  if (n.take())
+  static uint32_t count = 0;
+  uint32_t drained = 0;
+  while (n.take(0)) // non-block: consume all queued notifications
   {
-    Serial.printf("[Notify/counter] core=%d, got event\n", xPortGetCoreID());
+    ++drained;
+    Serial.printf("[Notify/counter] core=%d, got event %u\n", xPortGetCoreID(), ++count);
   }
+  // en: throttle checks to show batched output; roughly 2 notifications per loop
+  // ja: 2秒ごとにチェックして、約2件まとめて出力される動作を確認
+  delay(2000);
 }
 
 void loop()

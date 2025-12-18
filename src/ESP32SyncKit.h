@@ -383,11 +383,33 @@ namespace ESP32SyncKit
       }
 
       TickType_t ticks = (timeoutMs == 0) ? 0 : (timeoutMs == WaitForever ? portMAX_DELAY : pdMS_TO_TICKS(timeoutMs));
-      uint32_t count = ulTaskNotifyTake(pdTRUE, ticks);
+      uint32_t count = ulTaskNotifyTake(pdFALSE, ticks);
       return count > 0;
     }
 
     bool tryTake() { return take(0); }
+
+    // en: Take all pending notifications at once, returning the count (clears to 0)
+    // ja: 溜まった通知をすべて取得し、件数を返す（カウンタを0にクリア）
+    uint32_t takeAll(uint32_t timeoutMs = WaitForever)
+    {
+      if (!lockMode(Mode::Counter))
+      {
+        return 0;
+      }
+      if (!ensureBoundForReceive())
+      {
+        return 0;
+      }
+      if (xPortInIsrContext())
+      {
+        // FreeRTOS does not support ulTaskNotifyTake from ISR; return immediately (non-block)
+        return 0;
+      }
+
+      TickType_t ticks = (timeoutMs == 0) ? 0 : (timeoutMs == WaitForever ? portMAX_DELAY : pdMS_TO_TICKS(timeoutMs));
+      return ulTaskNotifyTake(pdTRUE, ticks);
+    }
 
     bool setBits(uint32_t mask)
     {

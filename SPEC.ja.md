@@ -191,6 +191,7 @@ q.clear();                           // キューをクリア（タスクのみ�
 notify.notify();                         // give。ISR/Task 自動判定
 notify.take(timeoutMs = WaitForever);    // 1 件消費（bool で成否）
 notify.tryTake();                        // == take(0)
+notify.takeAll(timeoutMs = WaitForever); // まとめて取り出し、件数を返す
 
 // ビット用途（EventGroup 風）
 notify.setBits(mask);                    // OR で積み上げ。ISR 可
@@ -204,9 +205,10 @@ notify.tryWaitBits(mask,
 ```
 
 - カウンタは `ulTaskNotifyTake` 相当で、`notify()` の回数を蓄積し `take()` で 1 件ずつ消費。残りは後続 `take()` で順次処理する。  
+- 溜まった件数を一度に取りたい場合は `takeAll()` を利用し、戻り値で件数を受ける（カウンタはクリアされる）。  
 - ビットは `xTaskNotifyWait` ベース。`waitAll=false` なら指定マスクのいずれかが立ったら復帰、`true` なら全ビットが揃うまで待つ。`clearOnExit=true` で満たしたビットをクリア。  
 - ISR からの `notify()` / `setBits()` は自動で FromISR 版を選択し、必要に応じて `portYIELD_FROM_ISR` を内部で実行する。  
-- `timeoutMs` に `WaitForever` を指定するとタスク上では無限待ち、ISR では強制ノンブロック（0ms）になる。戻り値は全て `bool`（成功/タイムアウト）。
+- `timeoutMs` に `WaitForever` を指定するとタスク上では無限待ち、ISR では強制ノンブロック（0ms）になる。`takeAll` は件数を返し、それ以外は `bool`（成功/タイムアウト）。
 - バインド方針: 初期状態は未バインド。最初に `take`/`waitBits` を呼んだタスクを受信者として自動バインドし、その後は固定。明示的に宛先を指定したい場合はコンストラクタや `bindTo(handle)` / `bindToSelf()` を用意し、一度バインドしたら再バインド不可。未バインドのまま `notify`/`setBits` が呼ばれた場合や、受信者と異なるタスクが `take`/`waitBits` を呼んだ場合は false を返しログで警告する。
 - モード方針: インスタンスごとに「カウンタ用」か「ビット用」を固定。コンストラクタで明示指定、または初回に呼ばれた API（`take` 系 or `waitBits` 系）で自動ロックし、異なるモードの呼び出しは false＋ログで拒否する。モード再設定は不可。
 - スレッド/ISR セーフ: 送信側（`notify`/`setBits`）はタスク/ISR どこからでも可。受信側（`take`/`waitBits`）はバインドしたタスクのみ。ISR からの受信は強制ノンブロックになるため、基本はタスク側で受信する運用を推奨。

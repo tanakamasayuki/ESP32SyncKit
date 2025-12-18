@@ -177,6 +177,7 @@ Task notification (counter/bits). Use `notify()` to accumulate, `take()` to cons
 notify.notify();                         // give. Auto Task/ISR
 notify.take(timeoutMs = WaitForever);    // consume one (bool)
 notify.tryTake();                        // == take(0)
+notify.takeAll(timeoutMs = WaitForever); // consume all, return count
 
 // Bit mode (EventGroup-like)
 notify.setBits(mask);                    // OR accumulate. ISR-safe
@@ -190,9 +191,10 @@ notify.tryWaitBits(mask,
 ```
 
 - Counter mode mirrors `ulTaskNotifyTake`: `notify()` counts up; `take()` consumes one; remaining counts stay for later `take()`.  
+- Use `takeAll()` when you want the accumulated count and to clear it in one call.  
 - Bit mode is based on `xTaskNotifyWait`: `waitAll=false` waits for any bit in mask, `true` waits for all; `clearOnExit=true` clears satisfied bits.  
 - ISR `notify()` / `setBits()` auto-pick FromISR versions and call `portYIELD_FROM_ISR` as needed.  
-- `timeoutMs = WaitForever` blocks forever in tasks, forced to 0 ms (non-blocking) in ISR. All return `bool` (success/timeout).
+- `timeoutMs = WaitForever` blocks forever in tasks, forced to 0 ms (non-blocking) in ISR. `takeAll` returns a count; others return `bool` (success/timeout).
 - Binding policy: start unbound. The first task that calls `take`/`waitBits` auto-binds as the receiver and remains fixed. If you want explicit binding, support ctor or `bindTo(handle)` / `bindToSelf()`, with no rebind allowed. Calling `notify`/`setBits` while unbound or calling `take`/`waitBits` from a non-receiver task returns false and logs a warning.
 - Mode policy: each instance is either “counter” or “bits”. Either specify via ctor or auto-lock on the first API used (`take` family vs `waitBits` family). Calls from the other mode are rejected (false + log). Re-locking is not allowed.
 - Thread/ISR safety: sending (`notify`/`setBits`) is allowed from any task or ISR. Receiving (`take`/`waitBits`) is only for the bound task. ISR receive is forced non-blocking and generally discouraged; prefer receiving in tasks.
