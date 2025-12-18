@@ -8,13 +8,13 @@
 #define CLEAR_PIN 0 // en: change for your board / ja: ボードに合わせて変更
 #endif
 
-constexpr uint32_t kQueueDepth = 8;
+constexpr uint32_t kQueueDepth = 4;
 // en: Burst count to overflow the queue
 // ja: キューを溢れさせるためのまとめ送り件数
-constexpr int kSpamBatch = 16;
+constexpr int kSpamBatch = 2;
 // en: Short period to force congestion
 // ja: 短い周期で詰まりを発生させる
-constexpr uint32_t kSpamPeriodMs = 5;
+constexpr uint32_t kSpamPeriodMs = 200;
 
 ESP32AutoSync::Queue<int> q(kQueueDepth);
 ESP32TaskKit::Task spammer;
@@ -26,8 +26,8 @@ void setup()
 
   pinMode(CLEAR_PIN, INPUT_PULLUP);
 
-  // en: TaskKit task (default stack, priority 2, any core), runs every 5 ms and spams queue to force failures
-  // ja: TaskKit タスク（デフォルトスタック、優先度2、コア指定なし）。5 ms 周期で大量送信してあふれを発生させる
+  // en: TaskKit task (default stack, priority 2, any core), runs every 200 ms and spams queue to force failures
+  // ja: TaskKit タスク（デフォルトスタック、優先度2、コア指定なし）。200 ms 周期で大量送信してあふれを発生させる
   spammer.startLoop(
       []
       {
@@ -55,6 +55,8 @@ void setup()
 
 void loop()
 {
+  Serial.println("[Queue/loop] start loop iteration =====================================");
+
   // en: Clear queue on GPIO falling edge (press button when you want to clear)
   // ja: GPIO 下降エッジでキューをクリア（クリアしたいタイミングでボタンを押す想定）
   static int lastLevel = HIGH;
@@ -83,5 +85,5 @@ void loop()
                   xPortGetCoreID(), v, static_cast<unsigned long>(q.count()));
   }
 
-  delay(1); // yield
+  delay(500);
 }
