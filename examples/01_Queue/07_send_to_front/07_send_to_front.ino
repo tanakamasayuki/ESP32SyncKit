@@ -1,4 +1,4 @@
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 #include <ESP32TaskKit.h>
 
 // en: Demonstrate sendToFront by inserting urgent items at the front of the queue
@@ -8,7 +8,7 @@ constexpr uint32_t kQueueDepth = 8;
 constexpr uint32_t kNormalPeriodMs = 300;
 constexpr uint32_t kUrgentInterval = 5;
 
-ESP32AutoSync::Queue<int> q(kQueueDepth);
+ESP32SyncKit::Queue<int> q(kQueueDepth);
 ESP32TaskKit::Task producer;
 ESP32TaskKit::Task consumer;
 

@@ -1,4 +1,4 @@
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 #include <ESP32TaskKit.h>
 
 // en: TaskKit spams queue to force send failures; loop() watches a GPIO (default pin 0) and clears on falling edge.
@@ -16,7 +16,7 @@ constexpr int kSpamBatch = 2;
 // ja: 短い周期で詰まりを発生させる
 constexpr uint32_t kSpamPeriodMs = 200;
 
-ESP32AutoSync::Queue<int> q(kQueueDepth);
+ESP32SyncKit::Queue<int> q(kQueueDepth);
 ESP32TaskKit::Task spammer;
 volatile bool gSendFailed = false;
 

@@ -1,5 +1,5 @@
 #include <ESP32TaskKit.h>
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
 // en: adjust to your board
 // ja: ボードに合わせてピン番号を設定
@@ -7,7 +7,7 @@ constexpr int kButtonPin = 0;
 
 // en: Button ISR gives semaphore; TaskKit task takes it
 // ja: ボタン ISR が give し、TaskKit タスクが take
-ESP32AutoSync::BinarySemaphore buttonSem;
+ESP32SyncKit::BinarySemaphore buttonSem;
 ESP32TaskKit::Task handlerTask;
 
 void IRAM_ATTR onButton()

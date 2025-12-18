@@ -1,7 +1,7 @@
 #include <ESP32AutoTask.h>
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
-ESP32AutoSync::BinarySemaphore startSignal;
+ESP32SyncKit::BinarySemaphore startSignal;
 
 void setup()
 {

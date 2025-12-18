@@ -9,11 +9,11 @@
 #include <freertos/semphr.h>
 #include <freertos/task.h>
 
-namespace ESP32AutoSync
+namespace ESP32SyncKit
 {
 
   constexpr uint32_t WaitForever = portMAX_DELAY;
-  inline constexpr const char *kLogTag = "ESP32AutoSync";
+  inline constexpr const char *kLogTag = "ESP32SyncKit";
 
   template <class T>
   class Queue
@@ -802,4 +802,4 @@ namespace ESP32AutoSync
     SemaphoreHandle_t handle_;
   };
 
-} // namespace ESP32AutoSync
+} // namespace ESP32SyncKit

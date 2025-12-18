@@ -1,4 +1,4 @@
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 #include <ESP32TaskKit.h>
 
 // en: TaskKit producer → main loop does non-blocking receive (tryReceive) and prints items.
@@ -9,7 +9,7 @@ constexpr uint32_t kQueueDepth = 8;
 // ja: 500 ms ごとに 1 件送信
 constexpr uint32_t kSendIntervalMs = 500;
 
-ESP32AutoSync::Queue<int> q(kQueueDepth);
+ESP32SyncKit::Queue<int> q(kQueueDepth);
 ESP32TaskKit::Task producer;
 
 void setup()

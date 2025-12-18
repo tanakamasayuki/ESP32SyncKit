@@ -1,10 +1,10 @@
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 #include <ESP32TaskKit.h>
 
 // en: Mailbox-style queue (depth=1) using overwrite to keep the latest value only
 // ja: 深さ1のキューを overwrite で最新値だけ保持するメールボックス例
 
-ESP32AutoSync::Queue<int> mailbox(1); // depth 1 -> mailbox semantics
+ESP32SyncKit::Queue<int> mailbox(1); // depth 1 -> mailbox semantics
 ESP32TaskKit::Task producer;
 ESP32TaskKit::Task consumer;
 

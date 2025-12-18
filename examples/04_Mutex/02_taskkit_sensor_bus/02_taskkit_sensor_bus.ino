@@ -1,9 +1,9 @@
 #include <ESP32TaskKit.h>
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
 // en: Protect shared bus (I2C/SPI) across TaskKit tasks with Mutex
 // ja: TaskKit タスク間で共有バスを Mutex で保護
-ESP32AutoSync::Mutex busMutex;
+ESP32SyncKit::Mutex busMutex;
 ESP32TaskKit::Task sensorTask;
 ESP32TaskKit::Task loggerTask;
 constexpr uint32_t kSensorHoldMs = 250;

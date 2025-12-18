@@ -1,5 +1,5 @@
 #include <ESP32TaskKit.h>
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
 constexpr uint32_t kBitRxReady = 1 << 0;
 constexpr uint32_t kBitTxDone = 1 << 1;
@@ -8,7 +8,7 @@ constexpr uint32_t kBitTxDone = 1 << 1;
 // ja: Notify ビットモード（TaskKit タスクで利用）
 // en: preset to bits mode
 // ja: ビットモードで初期化
-ESP32AutoSync::Notify evt(ESP32AutoSync::Notify::Mode::Bits);
+ESP32SyncKit::Notify evt(ESP32SyncKit::Notify::Mode::Bits);
 ESP32TaskKit::Task producer;
 ESP32TaskKit::Task consumer;
 

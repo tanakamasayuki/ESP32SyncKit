@@ -1,16 +1,16 @@
 #include <Arduino.h>
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
 // en: Protect shared counter between raw FreeRTOS tasks
 // ja: 生 FreeRTOS タスク間で共有カウンタを Mutex で保護
-ESP32AutoSync::Mutex bufMutex;
+ESP32SyncKit::Mutex bufMutex;
 int sharedCounter = 0;
 
 void writer(void * /*pv*/)
 {
   for (;;)
   {
-    ESP32AutoSync::Mutex::LockGuard lock(bufMutex);
+    ESP32SyncKit::Mutex::LockGuard lock(bufMutex);
     if (lock.locked())
     {
       sharedCounter++;
@@ -28,7 +28,7 @@ void reader(void * /*pv*/)
 {
   for (;;)
   {
-    ESP32AutoSync::Mutex::LockGuard lock(bufMutex);
+    ESP32SyncKit::Mutex::LockGuard lock(bufMutex);
     if (lock.locked())
     {
       Serial.printf("[Mutex/raw] reader: %d\n", sharedCounter);

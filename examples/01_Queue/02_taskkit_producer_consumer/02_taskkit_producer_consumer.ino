@@ -1,9 +1,9 @@
 #include <ESP32TaskKit.h>
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
 // en: Queue between two TaskKit tasks (producer/consumer), depth=8
 // ja: TaskKit の2タスク間で使うキュー（送受信）、深さ8
-ESP32AutoSync::Queue<int> q(8);
+ESP32SyncKit::Queue<int> q(8);
 ESP32TaskKit::Task producer;
 ESP32TaskKit::Task consumer;
 

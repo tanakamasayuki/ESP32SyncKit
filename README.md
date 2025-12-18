@@ -1,4 +1,4 @@
-# ESP32AutoSync
+# ESP32SyncKit
 
 English | [日本語](README.ja.md)
 
@@ -11,7 +11,7 @@ Header-only C++ wrappers for FreeRTOS sync primitives on ESP32 (Arduino). Design
 
 ## Highlights
 - Type-safe queues, RAII helpers, unified blocking/non-blocking APIs.
-- Common log tag: `ESP32AutoSync`. Add class markers like `[Queue]` if needed.
+- Common log tag: `ESP32SyncKit`. Add class markers like `[Queue]` if needed.
 - WaitForever constant for “block forever” (forced non-block in ISR).
 
 ## Components
@@ -21,19 +21,19 @@ Header-only C++ wrappers for FreeRTOS sync primitives on ESP32 (Arduino). Design
 - Mutex: priority-inheritance mutex (non-recursive), LockGuard included.
 
 ## How it fits with task libraries
-- ESP32AutoTask: use weak hooks (`LoopCore0_*`, `LoopCore1_*`) and call ESP32AutoSync inside them.
-- ESP32TaskKit: create tasks with ESP32TaskKit and use ESP32AutoSync for sync; clear separation between task mgmt and sync.
-- Raw FreeRTOS: tasks created with `xTaskCreatePinnedToCore` can use ESP32AutoSync directly.
+- ESP32AutoTask: use weak hooks (`LoopCore0_*`, `LoopCore1_*`) and call ESP32SyncKit inside them.
+- ESP32TaskKit: create tasks with ESP32TaskKit and use ESP32SyncKit for sync; clear separation between task mgmt and sync.
+- Raw FreeRTOS: tasks created with `xTaskCreatePinnedToCore` can use ESP32SyncKit directly.
 
 ## Install
-- Arduino IDE Library Manager: search “ESP32AutoSync”.
+- Arduino IDE Library Manager: search “ESP32SyncKit”.
 - Manual: download the release ZIP and place under `Arduino/libraries`.
 
 ## Quick usage (preview)
 ```cpp
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
-ESP32AutoSync::Queue<int> q(4);
+ESP32SyncKit::Queue<int> q(4);
 
 void IRAM_ATTR onGpio()
 {
@@ -46,7 +46,7 @@ void setup() {
 
 void loop() {
   int v;
-  if (q.receive(v, ESP32AutoSync::WaitForever)) {
+  if (q.receive(v, ESP32SyncKit::WaitForever)) {
     Serial.println(v);
   }
 }
@@ -63,7 +63,7 @@ void loop() {
 ## Related libraries
 - ESP32AutoTask: https://github.com/tanakamasayuki/ESP32AutoTask
 - ESP32TaskKit: https://github.com/tanakamasayuki/ESP32TaskKit
-- ESP32AutoSync: https://github.com/tanakamasayuki/ESP32AutoSync
+- ESP32SyncKit: https://github.com/tanakamasayuki/ESP32SyncKit
 
 ## License
 - MIT License (see LICENSE).

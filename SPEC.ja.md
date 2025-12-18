@@ -1,9 +1,9 @@
-# ESP32AutoSync 仕様書
+# ESP32SyncKit 仕様書
 
-ESP32AutoSync は、ESP32（Arduino）向けの  
+ESP32SyncKit は、ESP32（Arduino）向けの  
 **FreeRTOS 同期プリミティブのヘッダオンリー C++ ラッパライブラリ**です。
 
-公式リポジトリ: https://github.com/tanakamasayuki/ESP32AutoSync
+公式リポジトリ: https://github.com/tanakamasayuki/ESP32SyncKit
 
 Arduino らしいモダン C++ API から FreeRTOS の正しい使い方を自然に学べる設計で、  
 FreeRTOS の Queue / TaskNotify / BinarySemaphore / Mutex をベースに  
@@ -13,20 +13,20 @@ FreeRTOS の Queue / TaskNotify / BinarySemaphore / Mutex をベースに
 - **統一されたブロック／非ブロック API**  
 を提供することで、より高い可読性と安全性を実現します。
 
-ESP32AutoSync は以下と**組み合わせて使うことができます**：
+ESP32SyncKit は以下と**組み合わせて使うことができます**：
 
 - 入門用タスクライブラリ：**ESP32AutoTask**（https://github.com/tanakamasayuki/ESP32AutoTask）
 - 中級者向けタスク管理ライブラリ：**ESP32TaskKit**（https://github.com/tanakamasayuki/ESP32TaskKit）
 - 生の FreeRTOS タスク（`xTaskCreatePinnedToCore` など）
 
 > **タスクの作り方は何でもOK。  
-> ESP32AutoSync は「タスク同士のつながり（Sync）」だけを担当するレイヤです。**
+> ESP32SyncKit は「タスク同士のつながり（Sync）」だけを担当するレイヤです。**
 
 ---
 
 ## 1. コンセプト
 
-ESP32AutoSync の主な目的：
+ESP32SyncKit の主な目的：
 
 1. **FreeRTOS の Queue / Notify / Semaphore / Mutex を C++ で安全＆直感的に扱えるようにする**
 2. **Arduino らしい書き味のまま FreeRTOS 的な正しい使い方を覚えられるようにする**
@@ -42,23 +42,23 @@ ESP32AutoSync の主な目的：
 ### 2.1 ESP32AutoTask との組み合わせ
 
 ESP32AutoTask で作られる弱宣言タスク（`LoopCore0_Low()` など）から  
-ESP32AutoSync の Queue / Notify / Mutex をそのまま利用できます。
+ESP32SyncKit の Queue / Notify / Mutex をそのまま利用できます。
 
 ### 2.2 ESP32TaskKit との組み合わせ
 
-ESP32TaskKit で作ったタスクからも ESP32AutoSync を自然に利用できます。  
-タスク管理は ESP32TaskKit、同期は ESP32AutoSync という明確な役割分担になります。
+ESP32TaskKit で作ったタスクからも ESP32SyncKit を自然に利用できます。  
+タスク管理は ESP32TaskKit、同期は ESP32SyncKit という明確な役割分担になります。
 
 ### 2.3 生の FreeRTOS タスクとの併用
 
-`xTaskCreatePinnedToCore()` などで生成したタスクからも ESP32AutoSync を利用可能。  
+`xTaskCreatePinnedToCore()` などで生成したタスクからも ESP32SyncKit を利用可能。  
 FreeRTOS の基本APIのみへ依存しており、Arduinoで動作します。
 
 ### 2.4 ライブラリ間の役割分担と学習ステップ
 - **ESP32AutoTask（補助輪）**: `begin()` を呼ぶだけでコア0/1の Low/Normal/High タスク枠が用意され、弱シンボルのフックを定義すれば動く。未定義フックは即終了しオーバーヘッドゼロ。
 - **ESP32TaskKit（中級者向け）**: `TaskConfig` と `Task.start/startLoop` でスタック/優先度/コアを明示し、`requestStop` で協調終了する。ラムダや functor で C++ らしく書ける。
-- **ESP32AutoSync（本ライブラリ）**: タスクは上記どれで作ってもよく、Queue/Notify/Semaphore/Mutex の正しい使い方を統一 API で提供する。ISR では「合図だけ」、タスクで処理本体という良い習慣を examples で身につけられる。
-- 学習導線: ESP32AutoTask で動かしてから ESP32AutoSync で同期を学び、さらに ESP32TaskKit でタスク設計を柔軟にする、という段階的習得を想定。
+- **ESP32SyncKit（本ライブラリ）**: タスクは上記どれで作ってもよく、Queue/Notify/Semaphore/Mutex の正しい使い方を統一 API で提供する。ISR では「合図だけ」、タスクで処理本体という良い習慣を examples で身につけられる。
+- 学習導線: ESP32AutoTask で動かしてから ESP32SyncKit で同期を学び、さらに ESP32TaskKit でタスク設計を柔軟にする、という段階的習得を想定。
 
 ---
 
@@ -67,7 +67,7 @@ FreeRTOS の基本APIのみへ依存しており、Arduinoで動作します。
 ### 3.1 名前空間
 
 ```cpp
-namespace ESP32AutoSync {
+namespace ESP32SyncKit {
     // Queue<T>, Notify, BinarySemaphore, Mutex など
 }
 ```
@@ -75,17 +75,17 @@ namespace ESP32AutoSync {
 ### 3.2 ファイル構成
 
 ```
-ESP32AutoSync/
+ESP32SyncKit/
   src/
-    ESP32AutoSync.h
-    ESP32AutoSyncQueue.h
-    ESP32AutoSyncNotify.h
-    ESP32AutoSyncBinarySemaphore.h
-    ESP32AutoSyncMutex.h
-    detail/ESP32AutoSyncCommon.h
+    ESP32SyncKit.h
+    ESP32SyncKitQueue.h
+    ESP32SyncKitNotify.h
+    ESP32SyncKitBinarySemaphore.h
+    ESP32SyncKitMutex.h
+    detail/ESP32SyncKitCommon.h
 ```
 
-ユーザーは ESP32AutoSync.h を読み込んで利用する方針。
+ユーザーは ESP32SyncKit.h を読み込んで利用する方針。
 
 ---
 
@@ -139,7 +139,7 @@ tryXXX()はXXX(0)を呼び出す。
 - ESP-IDF の `ESP_LOGE/W/I/D/V` を常に利用可能にする（Arduino 環境でも有効）
 - 目安: E=致命/操作失敗、W=リトライ・タイムアウト等、I=初期化や設定値、D/V=デバッグ用詳細
 - ログの初期化やレベル設定は Arduino ボード定義側で行われる前提とし、ライブラリ側では触らない
-- ログタグは共通で `ESP32AutoSync` を使用。クラス識別が必要な場合はメッセージ先頭に `[Queue]` `[Notify]` `[BinarySemaphore]` `[Mutex]` などを付与する。
+- ログタグは共通で `ESP32SyncKit` を使用。クラス識別が必要な場合はメッセージ先頭に `[Queue]` `[Notify]` `[BinarySemaphore]` `[Mutex]` などを付与する。
 
 ### 4.8 設定方法
 - 初期リリースはグローバル設定なし。各クラスのコンストラクタ/メソッド引数だけで使える構成とする
@@ -256,13 +256,13 @@ Mutex::LockGuard guard(mutex);          // RAII でスコープ解放時 unlock
 
 ## 7. ユースケース例
 
-### 7.1 ESP32AutoTask + ESP32AutoSync
+### 7.1 ESP32AutoTask + ESP32SyncKit
 ISR → ESP32AutoTask タスクへ処理移譲。
 
-### 7.2 ESP32TaskKit + ESP32AutoSync
+### 7.2 ESP32TaskKit + ESP32SyncKit
 複数 ESP32TaskKit タスクでキュー共有。
 
-### 7.3 生 FreeRTOS + ESP32AutoSync
+### 7.3 生 FreeRTOS + ESP32SyncKit
 既存タスク群の同期レイヤとして追加可能。
 
 ### 7.4 サンプルコードのコメント方針
@@ -280,7 +280,7 @@ ISR → ESP32AutoTask タスクへ処理移譲。
 ## 8. 設計ポリシー
 
 - タスク生成・管理は ESP32AutoTask / ESP32TaskKit / FreeRTOS に委譲  
-- ESP32AutoSync は同期だけを担当（シンプル&安定）  
+- ESP32SyncKit は同期だけを担当（シンプル&安定）  
 - API は tryXXX と XXX の2系統に統一  
 - Queue の型だけテンプレートとし、その他はシンプルに保つ
 - 戻り値は `bool` で返し、例外は使わない

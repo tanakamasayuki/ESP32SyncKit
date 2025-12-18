@@ -1,8 +1,8 @@
-# ESP32AutoSync Specification
+# ESP32SyncKit Specification
 
-ESP32AutoSync is a **header-only C++ wrapper around FreeRTOS sync primitives for ESP32 (Arduino)**.
+ESP32SyncKit is a **header-only C++ wrapper around FreeRTOS sync primitives for ESP32 (Arduino)**.
 
-Official repository: https://github.com/tanakamasayuki/ESP32AutoSync
+Official repository: https://github.com/tanakamasayuki/ESP32SyncKit
 
 It is designed so Arduino-style modern C++ naturally guides you to correct FreeRTOS usage. Built on FreeRTOS Queue / TaskNotify / BinarySemaphore / Mutex with:
 - **Type-safe templates**
@@ -10,19 +10,19 @@ It is designed so Arduino-style modern C++ naturally guides you to correct FreeR
 - **Automatic ISR detection**
 - **Unified blocking / non-blocking APIs**
 
-ESP32AutoSync works seamlessly with:
+ESP32SyncKit works seamlessly with:
 - Entry-level task library: **ESP32AutoTask** (https://github.com/tanakamasayuki/ESP32AutoTask)
 - Intermediate task manager: **ESP32TaskKit** (https://github.com/tanakamasayuki/ESP32TaskKit)
 - Raw FreeRTOS tasks (`xTaskCreatePinnedToCore`, etc.)
 
 > **Create tasks however you like.  
-> ESP32AutoSync is the layer that only handles “sync between tasks.”**
+> ESP32SyncKit is the layer that only handles “sync between tasks.”**
 
 ---
 
 ## 1. Concept
 
-Goals of ESP32AutoSync:
+Goals of ESP32SyncKit:
 
 1. Make FreeRTOS Queue / Notify / Semaphore / Mutex safe and intuitive in C++.
 2. Keep Arduino-like ergonomics while encouraging correct FreeRTOS usage.
@@ -36,19 +36,19 @@ Goals of ESP32AutoSync:
 ## 2. Relationship to Other Libraries
 
 ### 2.1 With ESP32AutoTask
-Weak-hook tasks (`LoopCore0_Low()`, etc.) created by ESP32AutoTask can call ESP32AutoSync Queue / Notify / Mutex directly.
+Weak-hook tasks (`LoopCore0_Low()`, etc.) created by ESP32AutoTask can call ESP32SyncKit Queue / Notify / Mutex directly.
 
 ### 2.2 With ESP32TaskKit
-Tasks created by ESP32TaskKit use ESP32AutoSync naturally: ESP32TaskKit manages tasks, ESP32AutoSync handles sync.
+Tasks created by ESP32TaskKit use ESP32SyncKit naturally: ESP32TaskKit manages tasks, ESP32SyncKit handles sync.
 
 ### 2.3 With Raw FreeRTOS Tasks
-Tasks made via `xTaskCreatePinnedToCore()` can also use ESP32AutoSync. Only core FreeRTOS APIs are required; works in Arduino.
+Tasks made via `xTaskCreatePinnedToCore()` can also use ESP32SyncKit. Only core FreeRTOS APIs are required; works in Arduino.
 
 ### 2.4 Roles and Learning Path
 - **ESP32AutoTask (training wheels):** `begin()` gives Low/Normal/High slots on core0/1; define weak hooks to run; undefined hooks exit immediately (zero overhead).
 - **ESP32TaskKit (intermediate):** `TaskConfig` + `start/startLoop` to set stack/priority/core; `requestStop` for cooperative exit; lambdas/functors for C++ style.
-- **ESP32AutoSync (this library):** Any task source; unified API for Queue/Notify/Semaphore/Mutex; examples teach “ISR signals, tasks do work.”
-- Learning flow: start with ESP32AutoTask, learn sync with ESP32AutoSync, then design tasks flexibly with ESP32TaskKit.
+- **ESP32SyncKit (this library):** Any task source; unified API for Queue/Notify/Semaphore/Mutex; examples teach “ISR signals, tasks do work.”
+- Learning flow: start with ESP32AutoTask, learn sync with ESP32SyncKit, then design tasks flexibly with ESP32TaskKit.
 
 ---
 
@@ -56,23 +56,23 @@ Tasks made via `xTaskCreatePinnedToCore()` can also use ESP32AutoSync. Only core
 
 ### 3.1 Namespace
 ```cpp
-namespace ESP32AutoSync {
+namespace ESP32SyncKit {
     // Queue<T>, Notify, BinarySemaphore, Mutex, etc.
 }
 ```
 
 ### 3.2 Files
 ```
-ESP32AutoSync/
+ESP32SyncKit/
   src/
-    ESP32AutoSync.h
-    ESP32AutoSyncQueue.h
-    ESP32AutoSyncNotify.h
-    ESP32AutoSyncBinarySemaphore.h
-    ESP32AutoSyncMutex.h
-    detail/ESP32AutoSyncCommon.h
+    ESP32SyncKit.h
+    ESP32SyncKitQueue.h
+    ESP32SyncKitNotify.h
+    ESP32SyncKitBinarySemaphore.h
+    ESP32SyncKitMutex.h
+    detail/ESP32SyncKitCommon.h
 ```
-Users include ESP32AutoSync.h.
+Users include ESP32SyncKit.h.
 
 ---
 
@@ -125,7 +125,7 @@ Internally uses `xPortInIsrContext()` and picks FromISR APIs automatically.
 - Always use ESP-IDF `ESP_LOGE/W/I/D/V` (available in Arduino).
 - E=critical/failure, W=retry/timeout, I=init/settings, D/V=debug details.
 - Logging level init is handled by board definitions; library does not touch it.
-- Use a common log tag `ESP32AutoSync`. If class disambiguation is needed, prefix the message with `[Queue]`, `[Notify]`, `[BinarySemaphore]`, `[Mutex]`, etc.
+- Use a common log tag `ESP32SyncKit`. If class disambiguation is needed, prefix the message with `[Queue]`, `[Notify]`, `[BinarySemaphore]`, `[Mutex]`, etc.
 
 ### 4.8 Configuration
 - No global settings initially. All via ctor/method args.
@@ -242,14 +242,14 @@ Mutex::LockGuard guard(mutex);          // RAII unlock on scope exit
 
 ## 7. Use Cases
 
-### 7.1 ESP32AutoTask + ESP32AutoSync
+### 7.1 ESP32AutoTask + ESP32SyncKit
 ISR → ESP32AutoTask tasks for processing handoff.
 
-### 7.2 ESP32TaskKit + ESP32AutoSync
+### 7.2 ESP32TaskKit + ESP32SyncKit
 Share queues among multiple ESP32TaskKit tasks.
 
-### 7.3 Raw FreeRTOS + ESP32AutoSync
-Add ESP32AutoSync as the sync layer for existing task sets.
+### 7.3 Raw FreeRTOS + ESP32SyncKit
+Add ESP32SyncKit as the sync layer for existing task sets.
 
 ### 7.4 Sample Comment Policy
 - Samples include both English/Japanese.
@@ -266,7 +266,7 @@ Add ESP32AutoSync as the sync layer for existing task sets.
 ## 8. Design Policy
 
 - Task creation/management is delegated to ESP32AutoTask / ESP32TaskKit / FreeRTOS.  
-- ESP32AutoSync focuses solely on synchronization (simple & stable).  
+- ESP32SyncKit focuses solely on synchronization (simple & stable).  
 - API is unified into tryXXX and XXX variants.  
 - Only Queue is templated; keep others simple.  
 - Return `bool`; no exceptions.  

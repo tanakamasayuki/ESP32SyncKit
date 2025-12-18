@@ -1,4 +1,4 @@
-# ESP32AutoSync
+# ESP32SyncKit
 
 [English](README.md) | 日本語
 
@@ -11,7 +11,7 @@ ESP32（Arduino）向けの FreeRTOS 同期プリミティブをラップする�
 
 ## 特長
 - Queue の型安全テンプレート、RAII ヘルパ、ブロック/ノンブロックの統一 API。
-- ログタグは共通で `ESP32AutoSync`（必要に応じて `[Queue]` などを付与）。
+- ログタグは共通で `ESP32SyncKit`（必要に応じて `[Queue]` などを付与）。
 - WaitForever 定数で「無限待ち」を表現（ISR では強制ノンブロック）。
 
 ## コンポーネント
@@ -21,19 +21,19 @@ ESP32（Arduino）向けの FreeRTOS 同期プリミティブをラップする�
 - Mutex: 標準ミューテックス（優先度継承・非再帰）。LockGuard 付き。
 
 ## タスクライブラリとの組み合わせ
-- ESP32AutoTask: 弱シンボルフック（`LoopCore0_*`, `LoopCore1_*`）の中で ESP32AutoSync を利用。
-- ESP32TaskKit: ESP32TaskKit でタスクを作り、同期は ESP32AutoSync に任せる（タスク管理と同期を分離）。
-- 生 FreeRTOS: `xTaskCreatePinnedToCore` などで作ったタスクから直接 ESP32AutoSync を利用。
+- ESP32AutoTask: 弱シンボルフック（`LoopCore0_*`, `LoopCore1_*`）の中で ESP32SyncKit を利用。
+- ESP32TaskKit: ESP32TaskKit でタスクを作り、同期は ESP32SyncKit に任せる（タスク管理と同期を分離）。
+- 生 FreeRTOS: `xTaskCreatePinnedToCore` などで作ったタスクから直接 ESP32SyncKit を利用。
 
 ## インストール
-- Arduino IDE ライブラリマネージャで「ESP32AutoSync」を検索。
+- Arduino IDE ライブラリマネージャで「ESP32SyncKit」を検索。
 - 手動: リリース ZIP をダウンロードし、`Arduino/libraries` に配置。
 
 ## 簡単な使い方（プレビュー）
 ```cpp
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
-ESP32AutoSync::Queue<int> q(4);
+ESP32SyncKit::Queue<int> q(4);
 
 void IRAM_ATTR onGpio()
 {
@@ -46,7 +46,7 @@ void setup() {
 
 void loop() {
   int v;
-  if (q.receive(v, ESP32AutoSync::WaitForever)) {
+  if (q.receive(v, ESP32SyncKit::WaitForever)) {
     Serial.println(v);
   }
 }
@@ -63,7 +63,7 @@ void loop() {
 ## 関連ライブラリ
 - ESP32AutoTask: https://github.com/tanakamasayuki/ESP32AutoTask
 - ESP32TaskKit: https://github.com/tanakamasayuki/ESP32TaskKit
-- ESP32AutoSync: https://github.com/tanakamasayuki/ESP32AutoSync
+- ESP32SyncKit: https://github.com/tanakamasayuki/ESP32SyncKit
 
 ## ライセンス
 - MIT License（LICENSE を参照）。

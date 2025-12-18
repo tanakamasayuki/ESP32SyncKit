@@ -1,4 +1,4 @@
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
 // en: ISR sends to queue on GPIO interrupt (default pin 0). loop() polls non-blocking and prints.
 // ja: GPIO 割り込み（デフォルト pin 0）でキューへ送信し、loop() でノンブロック受信して表示する例
@@ -11,7 +11,7 @@
 // ja: 深さ 8 のキューに ISR から積む
 constexpr uint32_t kQueueDepth = 8;
 
-ESP32AutoSync::Queue<int> q(kQueueDepth);
+ESP32SyncKit::Queue<int> q(kQueueDepth);
 volatile bool gSendFailed = false;
 
 void IRAM_ATTR onButton()

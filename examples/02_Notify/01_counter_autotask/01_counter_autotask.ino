@@ -1,11 +1,11 @@
 #include <ESP32AutoTask.h>
-#include <ESP32AutoSync.h>
+#include <ESP32SyncKit.h>
 
 // en: Notify in counter mode (auto-lock on first use)
 // ja: Notify カウンタモード（初回使用でモード確定）
 // en: counter mode locks on first use
 // ja: 初回使用でカウンタモードに固定
-ESP32AutoSync::Notify n;
+ESP32SyncKit::Notify n;
 
 void setup()
 {
