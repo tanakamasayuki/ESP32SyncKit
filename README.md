@@ -60,10 +60,10 @@ void loop() {
 - [Specification (EN)](SPEC.md)
 - [仕様書 (JA)](SPEC.ja.md)
 
-## Related libraries
-- ESP32AutoTask: https://github.com/tanakamasayuki/ESP32AutoTask
-- ESP32TaskKit: https://github.com/tanakamasayuki/ESP32TaskKit
-- ESP32SyncKit: https://github.com/tanakamasayuki/ESP32SyncKit
+## Library family and when to use them
+- [ESP32AutoTask](https://github.com/tanakamasayuki/ESP32AutoTask): auto-runs tasks when you define weak-hook functions like `LoopCore0_Low` or `LoopCore1_High`. Great for quick sketches and a handful of simple tasks; not intended for running lots of tasks or tuning their parameters.
+- [ESP32TaskKit](https://github.com/tanakamasayuki/ESP32TaskKit): C++ task manager with config objects (priority/core/stack, lifecycle helpers). Use this when you want predictable task setup without writing raw FreeRTOS code—covers most real projects.
+- [ESP32SyncKit](https://github.com/tanakamasayuki/ESP32SyncKit) (this library): queue/notify/semaphore/mutex wrappers that stay independent of task creation. Pair with either AutoTask or TaskKit (or raw FreeRTOS) to pass data and notifications safely.
 
 ## License
 - MIT License (see LICENSE).
