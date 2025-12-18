@@ -1,0 +1,12 @@
+profiles:
+  esp32:
+    fqbn: esp32:esp32:esp32:DebugLevel=debug
+    platforms:
+      - platform: esp32:esp32 (3.3.4)
+        platform_index_url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+    libraries:
+      - dir: ../../../
+      - ESP32AutoTask (1.0.4)
+      - ESP32TaskKit (1.1.1)
+
+default_profile: esp32
