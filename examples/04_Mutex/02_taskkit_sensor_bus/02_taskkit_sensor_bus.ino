@@ -21,13 +21,18 @@ void setup()
       {
         static bool holding = false;
         static uint32_t releaseAtMs = 0;
+        static uint32_t startMs = 0;
 
         if (!holding)
         {
           if (busMutex.lock())
           {
             holding = true;
-            releaseAtMs = millis() + kSensorHoldMs;
+            startMs = millis();
+            releaseAtMs = startMs + kSensorHoldMs;
+            Serial.printf("[Mutex/TaskKit] sensor locked (hold %lu ms) @ %lu ms\n",
+                          static_cast<unsigned long>(kSensorHoldMs),
+                          static_cast<unsigned long>(startMs));
           }
           else
           {
@@ -41,6 +46,10 @@ void setup()
             Serial.println("[Mutex/TaskKit] unlock failed");
           }
           holding = false;
+          uint32_t now = millis();
+          Serial.printf("[Mutex/TaskKit] sensor unlocked @ %lu ms (held %lu ms)\n",
+                        static_cast<unsigned long>(now),
+                        static_cast<unsigned long>(now - startMs));
         }
         return true;
       },
@@ -54,14 +63,18 @@ void setup()
       {
         static bool holding = false;
         static uint32_t releaseAtMs = 0;
+        static uint32_t startMs = 0;
 
         if (!holding)
         {
           if (busMutex.lock())
           {
             holding = true;
-            releaseAtMs = millis() + kLoggerHoldMs;
-            Serial.println("[Mutex/TaskKit] logging with bus lock");
+            startMs = millis();
+            releaseAtMs = startMs + kLoggerHoldMs;
+            Serial.printf("[Mutex/TaskKit] logger locked (hold %lu ms) @ %lu ms\n",
+                          static_cast<unsigned long>(kLoggerHoldMs),
+                          static_cast<unsigned long>(startMs));
           }
           else
           {
@@ -75,6 +88,10 @@ void setup()
             Serial.println("[Mutex/TaskKit] unlock failed");
           }
           holding = false;
+          uint32_t now = millis();
+          Serial.printf("[Mutex/TaskKit] logger unlocked @ %lu ms (held %lu ms)\n",
+                        static_cast<unsigned long>(now),
+                        static_cast<unsigned long>(now - startMs));
         }
         return true;
       },
