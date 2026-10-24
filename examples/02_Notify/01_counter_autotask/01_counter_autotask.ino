@@ -1,3 +1,5 @@
+// en: Count task notifications between hooks
+// ja: フック間の通知をカウンタとして受け取る
 #include <ESP32AutoTask.h>
 #include <ESP32SyncKit.h>
 
@@ -10,6 +12,8 @@ ESP32SyncKit::Notify n;
 void setup()
 {
   Serial.begin(115200);
+  // en: Initialize this component after its prerequisites; inspect the returned status where provided.
+  // ja: 前提となる機器を準備してから初期化し、結果を返すAPIでは成否を確認します。
   ESP32AutoTask::AutoTask.begin();
 }
 

@@ -1,3 +1,5 @@
+// en: Observe two tasks competing for one bus lock
+// ja: 2つのタスクが1つのバスLockを使う様子を見る
 #include <ESP32TaskKit.h>
 #include <ESP32SyncKit.h>
 
@@ -25,6 +27,8 @@ void setup()
 
         if (!holding)
         {
+          // en: Acquire exclusive ownership before shared access; respect this wrapper’s timeout unit.
+          // ja: 共有領域を使う前に排他権を取得し、このラッパーの待ち時間単位に合わせます。
           if (busMutex.lock())
           {
             holding = true;

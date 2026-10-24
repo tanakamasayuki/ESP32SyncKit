@@ -1,3 +1,5 @@
+// en: Connect a producer and consumer through a queue
+// ja: Queueで生成側と処理側をつなぐ
 #include <ESP32TaskKit.h>
 #include <ESP32SyncKit.h>
 

@@ -1,3 +1,5 @@
+// en: Keep only the newest value in a one-slot mailbox
+// ja: 1要素のMailboxで最新の値だけを保持する
 #include <ESP32SyncKit.h>
 #include <ESP32TaskKit.h>
 
@@ -36,6 +38,8 @@ void setup()
       []
       {
         int v = 0;
+        // en: Poll without waiting and use output only when an item was returned.
+        // ja: 待たずに確認し、要素を取得できた場合だけ出力を使います。
         if (mailbox.tryReceive(v))
         {
           Serial.printf("[Queue/mailbox] core=%d, latest=%d\n", xPortGetCoreID(), v);

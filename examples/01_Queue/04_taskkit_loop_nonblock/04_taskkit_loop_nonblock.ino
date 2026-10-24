@@ -1,3 +1,5 @@
+// en: Poll queued values without blocking Arduino loop
+// ja: Arduino loopを止めずにQueueを確認する
 #include <ESP32SyncKit.h>
 #include <ESP32TaskKit.h>
 
@@ -37,6 +39,8 @@ void setup()
 void loop()
 {
   int v = 0;
+  // en: Poll without waiting and use output only when an item was returned.
+  // ja: 待たずに確認し、要素を取得できた場合だけ出力を使います。
   while (q.tryReceive(v))
   {
     // en: loop() side receives non-blocking and prints the item

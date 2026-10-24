@@ -1,3 +1,5 @@
+// en: Defer a button interrupt with a semaphore
+// ja: ボタン割り込みをSemaphoreでタスクへ渡す
 #include <ESP32TaskKit.h>
 #include <ESP32SyncKit.h>
 
@@ -10,6 +12,8 @@ constexpr int kButtonPin = 0;
 ESP32SyncKit::BinarySemaphore buttonSem;
 ESP32TaskKit::Task handlerTask;
 
+// en: Interrupt context: signal/copy only; do not wait or print here.
+// ja: 割り込み側では合図や短いコピーだけを行い、待機や表示をしないようにします。
 void IRAM_ATTR onButton()
 {
   // en: ISR-safe give

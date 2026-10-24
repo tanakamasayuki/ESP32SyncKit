@@ -1,3 +1,5 @@
+// en: Pass copied values between AutoTask hooks
+// ja: AutoTaskフック間で値のコピーを渡す
 #include <ESP32AutoTask.h>
 #include <ESP32SyncKit.h>
 

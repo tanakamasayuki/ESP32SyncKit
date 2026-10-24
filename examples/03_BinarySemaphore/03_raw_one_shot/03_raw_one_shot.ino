@@ -1,3 +1,5 @@
+// en: Send a one-shot signal between raw tasks
+// ja: 生タスク間で1回の合図を受け渡す
 #include <Arduino.h>
 #include <ESP32SyncKit.h>
 

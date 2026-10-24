@@ -1,10 +1,14 @@
+// en: Take all pending notification counts in loop
+// ja: 保留中の通知回数をloopでまとめて受け取る
 #include <ESP32TaskKit.h>
 #include <ESP32SyncKit.h>
 
 // en: TaskKit producer sends notify bursts; loop() drains them with takeAll()
 // ja: TaskKit 送信タスクで通知をバースト送信し、loop() で takeAll() によりまとめて受信
 
-ESP32SyncKit::Notify n; // en: auto-locks to counter mode on first use / ja: 初回利用でカウンタモードに自動固定
+// en: auto-locks to counter mode on first use
+// ja: 初回利用でカウンタモードに自動固定
+ESP32SyncKit::Notify n;
 ESP32TaskKit::Task producer;
 
 void setup()

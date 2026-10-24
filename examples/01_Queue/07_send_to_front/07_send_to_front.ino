@@ -1,3 +1,5 @@
+// en: Insert an item at the front of a queue
+// ja: Queueの先頭へ優先する要素を入れる
 #include <ESP32SyncKit.h>
 #include <ESP32TaskKit.h>
 
@@ -39,6 +41,8 @@ void setup()
         }
         else
         {
+          // en: Submit the supplied data and check the API-specific result; acceptance is different from later processing.
+          // ja: データを渡して対象APIの結果を確認します。受理されたことと後の処理完了は別です。
           if (!q.send(payload, 0))
           {
             Serial.println("[Queue/front] send failed");
@@ -55,6 +59,8 @@ void setup()
       []
       {
         int v = 0;
+        // en: Consume output only after a successful receive; a timeout does not produce a new valid item.
+        // ja: 受信成功を確認してから出力を使います。時間切れでは新しい有効値は得られません。
         if (q.receive(v))
         {
           Serial.printf("[Queue/front] core=%d, received=%d\n", xPortGetCoreID(), v);

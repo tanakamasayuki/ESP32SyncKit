@@ -1,9 +1,13 @@
+// en: Wait for selected notification event bits
+// ja: 選択したイベントbitの通知を待つ
 #include <ESP32TaskKit.h>
 #include <ESP32SyncKit.h>
 
 constexpr uint32_t kBitRxReady = 1 << 0; // en: RX ready flag / ja: RX ready 用ビット
 constexpr uint32_t kBitTxDone = 1 << 1;  // en: TX done flag / ja: TX done 用ビット
-constexpr uint32_t kBitNoise = 1 << 2;   // en: unused/noisy bit (should be ignored) / ja: 未使用・ノイズ用ビット（無視される想定）
+// en: unused/noisy bit (should be ignored)
+// ja: 未使用・ノイズ用ビット（無視される想定）
+constexpr uint32_t kBitNoise = 1 << 2;
 
 // en: Notify in bits mode (TaskKit tasks)
 // ja: Notify ビットモード（TaskKit タスクで利用）
@@ -26,7 +30,9 @@ void setup()
           SendTx
         };
         static Phase phase = Phase::SendRx;
-        static uint8_t cooldown = 0; // en: count 200 ms ticks to space events / ja: 200 ms 単位で間引き
+        // en: count 200 ms ticks to space events
+        // ja: 200 ms 単位で間引き
+        static uint8_t cooldown = 0;
 
         if (cooldown > 0)
         {
@@ -56,7 +62,9 @@ void setup()
           // ja: マスク外ビットは waitBits で無視されることを示すため、未使用ビットも立てる
           (void)evt.setBits(kBitNoise);
           phase = Phase::SendRx;
-          cooldown = 3; // en: wait another 600 ms before the next RX-ready / ja: 次の RX ready まで 600 ms 空ける
+          // en: wait another 600 ms before the next RX-ready
+          // ja: 次の RX ready まで 600 ms 空ける
+          cooldown = 3;
         }
         return true;
       },
@@ -68,7 +76,9 @@ void setup()
   consumer.startLoop(
       []
       {
-        static uint32_t lastMs = 0; // en: remember previous reception time / ja: 前回受信時刻を保持
+        // en: remember previous reception time
+        // ja: 前回受信時刻を保持
+        static uint32_t lastMs = 0;
         // en: wait for both bits (RX+TX). Only masked bits matter; extra bits are ignored. Clear on exit.
         // ja: RX+TX の2ビットが揃うまで待機。マスクしたビットだけを評価し、他のビットは無視。復帰時にクリア。
         if (evt.waitBits(kBitRxReady | kBitTxDone, true, true))

@@ -1,3 +1,5 @@
+// en: Guard a shared counter with scoped locking
+// ja: 共有カウンタをスコープ付きLockで保護する
 #include <Arduino.h>
 #include <ESP32SyncKit.h>
 
@@ -12,6 +14,8 @@ void writer(void * /*pv*/)
   {
     {
       ESP32SyncKit::Mutex::LockGuard lock(bufMutex);
+      // en: Check scoped-lock acquisition before accessing protected data.
+      // ja: 保護した値へ触る前に、スコープ付きLockの取得を確認します。
       if (lock.locked())
       {
         sharedCounter++;

@@ -1,3 +1,5 @@
+// en: Observe queue-full rejection and clearing
+// ja: Queue満杯による拒否とclearの動作を確認する
 #include <ESP32SyncKit.h>
 #include <ESP32TaskKit.h>
 
@@ -77,6 +79,8 @@ void loop()
   }
 
   int v = 0;
+  // en: Poll without waiting and use output only when an item was returned.
+  // ja: 待たずに確認し、要素を取得できた場合だけ出力を使います。
   while (q.tryReceive(v))
   {
     // en: Non-blocking receive; show core, data, and remaining count

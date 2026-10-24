@@ -1,3 +1,5 @@
+// en: Queue a GPIO interrupt signal for task processing
+// ja: GPIO割り込みをQueueへ渡してタスクで処理する
 #include <ESP32SyncKit.h>
 
 // en: ISR sends to queue on GPIO interrupt (default pin 0). loop() polls non-blocking and prints.
@@ -14,11 +16,13 @@ constexpr uint32_t kQueueDepth = 8;
 ESP32SyncKit::Queue<int> q(kQueueDepth);
 volatile bool gSendFailed = false;
 
+// en: Interrupt context: signal/copy only; do not wait or print here.
+// ja: 割り込み側では合図や短いコピーだけを行い、待機や表示をしないようにします。
 void IRAM_ATTR onButton()
 {
   static int counter = 0;
   // en: ISR context, keep it minimal; no Serial here.
-  // ja: ISR 内なので処理は最小限。Serial は使わない
+  // ja: ISR 内なので処理は最小限。シリアル は使わない
   if (!q.trySend(counter++))
   {
     // en: Avoid logging in ISR; set a flag instead
@@ -48,6 +52,8 @@ void loop()
   }
 
   int v = 0;
+  // en: Poll without waiting and use output only when an item was returned.
+  // ja: 待たずに確認し、要素を取得できた場合だけ出力を使います。
   while (q.tryReceive(v))
   {
     // en: Non-blocking receive; print core, data, and remaining count

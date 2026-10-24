@@ -1,3 +1,5 @@
+// en: Use event-bit notifications from raw tasks
+// ja: FreeRTOSの生タスクでイベントbitを通知する
 #include <Arduino.h>
 #include <ESP32SyncKit.h>
 

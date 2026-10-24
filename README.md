@@ -4,6 +4,8 @@ English | [日本語](README.ja.md)
 
 Header-only C++ wrappers for FreeRTOS sync primitives on ESP32 (Arduino). Designed to teach correct FreeRTOS usage through an Arduino-like API while staying safe for both tasks and ISRs.
 
+Start with the [example workflow](docs/GUIDE_EXAMPLES.md) and [individual example READMEs](examples/README.md) for setup, API sequence, verification and adaptation notes.
+
 ## What is this?
 - Header-only sync layer for Arduino-ESP32 (FreeRTOS).
 - Safe from both tasks and ISRs; FromISR is picked automatically.

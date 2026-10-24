@@ -1,3 +1,5 @@
+// en: Use a queue from raw FreeRTOS tasks
+// ja: FreeRTOSの生タスクからQueueを使う
 #include <Arduino.h>
 #include <ESP32SyncKit.h>
 

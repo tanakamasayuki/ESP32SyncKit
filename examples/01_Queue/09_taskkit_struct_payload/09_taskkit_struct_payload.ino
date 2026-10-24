@@ -1,3 +1,5 @@
+// en: Transfer a fixed-size structure through a queue
+// ja: 固定長の構造体をQueueで受け渡す
 #include <ESP32TaskKit.h>
 #include <ESP32SyncKit.h>
 
@@ -35,6 +37,8 @@ void setup()
             .temperatureC = 24.5f + (seq % 20) * 0.1f, // en/ja: dummy value
             .timestampMs = millis(),
         };
+        // en: Submit the supplied data and check the API-specific result; acceptance is different from later processing.
+        // ja: データを渡して対象APIの結果を確認します。受理されたことと後の処理完了は別です。
         if (!q.send(pkt, 1000))
         {
           Serial.println("[Queue/struct] send failed");
@@ -50,6 +54,8 @@ void setup()
       []
       {
         SensorPacket pkt{};
+        // en: Consume output only after a successful receive; a timeout does not produce a new valid item.
+        // ja: 受信成功を確認してから出力を使います。時間切れでは新しい有効値は得られません。
         if (q.receive(pkt))
         {
           Serial.printf("[Queue/struct] core=%d, seq=%lu, temp=%.1f C, ts=%lu ms\n",

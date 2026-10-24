@@ -4,6 +4,8 @@
 
 ESP32（Arduino）向けの FreeRTOS 同期プリミティブをラップするヘッダオンリー C++ ライブラリ。Arduino らしい書き味のまま、タスク/ISR 両方から安全に使える設計です。
 
+初めて使う場合は[サンプル入門ガイド](docs/GUIDE_EXAMPLES.ja.md)と[各例の日英README](examples/README.ja.md)を参照してください。準備、APIの流れ、確認方法、組み込み時の注意を説明しています。
+
 ## これは何？
 - Arduino-ESP32（FreeRTOS）向け同期レイヤ。
 - ISR 自動判定で FromISR を自動選択。
